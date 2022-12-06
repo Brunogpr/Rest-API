@@ -1,14 +1,6 @@
-/*async function connect(){
-    if(global.connection && global.connection.state !== 'disconnected')
-        return global.connection;
-
-    const mysql = require('mysql')
-    const connection = await mysql.createConnection("mysql://root:letspipou@localhost:3306/ecommerce")
-    global.connection = connection
-*/
-
 const mysql = require('mysql')
 var pool = mysql.createPool({
+    "connectionLimit" : 1000,
     "user": process.env.MYSQL_USER,
     "password": process.env.MYSQL_PASSWORD,
     "database": process.env.MYSQL_DATABASE,
@@ -16,5 +8,16 @@ var pool = mysql.createPool({
     "port": process.env.MYSQL_PORT
 })
 
+exports.execute = (query, params=[]) => { 
+    return new Promise((resolve, reject) => {
+        pool.query(query, params, (error, result, fields) => {
+            if (error) {
+                reject(error)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
 
 exports.pool = pool
